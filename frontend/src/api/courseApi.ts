@@ -2,14 +2,17 @@ import axios from "axios";
 
 const API = axios.create({
   baseURL: "http://localhost:5000/api",
+  withCredentials: true,
 });
 
 export async function getCourses() {
-  const res = await fetch("http://localhost:5000/api/courses", {
-    credentials: "include",
-  });
+  const res = await API.get("/courses");
+  return res.data;
+}
 
-  return res.json();
+export async function getCourseBySlug(slug: string) {
+  const res = await API.get(`/courses/${slug}`);
+  return res.data;
 }
 
 export const createCourse = async (course: any) => {

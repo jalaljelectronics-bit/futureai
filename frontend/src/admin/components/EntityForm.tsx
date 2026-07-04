@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import type { EntityConfig, FieldConfig } from "../config/entities";
-import type { AnyRecord, CourseModule, CourseFAQ } from "../types";
+import type { AnyRecord } from "../types";
 
 interface Props {
   entity: EntityConfig;
@@ -9,44 +9,68 @@ interface Props {
   onCancel: () => void;
 }
 
-function modulesToText(modules: CourseModule[] | undefined): string {
-  return (modules || []).map((m) => `${m.module_title} | ${m.module_description || ""} | ${m.module_duration || ""}`).join("\n");
+// ---- generic line-based list helpers (used for outcomes / tools) ----
+function listToText(list: string[] | undefined): string {
+  return (list || []).join("\n");
 }
-function textToModules(text: string): CourseModule[] {
+function textToList(text: string): string[] {
   return text
     .split("\n")
     .map((l) => l.trim())
-    .filter(Boolean)
-    .map((line, i) => {
-      const [module_title, module_description, module_duration] = line.split("|").map((s) => (s || "").trim());
-      return { module_title, module_description, module_duration, module_order: i + 1 };
-    });
+    .filter(Boolean);
 }
-function faqsToText(faqs: CourseFAQ[] | undefined): string {
-  return (faqs || []).map((f) => `${f.question} | ${f.answer}`).join("\n");
+
+// ---- curriculum helpers: Title | Duration | Body per line ----
+interface CurriculumItem {
+  title: string;
+  dur: string;
+  body: string;
 }
-function textToFaqs(text: string): CourseFAQ[] {
+function curriculumToText(items: CurriculumItem[] | undefined): string {
+  return (items || []).map((m) => `${m.title} | ${m.dur || ""} | ${m.body || ""}`).join("\n");
+}
+function textToCurriculum(text: string): CurriculumItem[] {
   return text
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean)
     .map((line) => {
-      const [question, answer] = line.split("|").map((s) => (s || "").trim());
-      return { question, answer };
+      const [title, dur, body] = line.split("|").map((s) => (s || "").trim());
+      return { title, dur, body };
     });
 }
 
 function initialValues(fields: FieldConfig[], record: AnyRecord | null): Record<string, any> {
   const values: Record<string, any> = {};
+  const outline = record?.courseOutline || {};
+
   fields.forEach((f) => {
-    if (f.special === "modules") {
-      values[f.name] = modulesToText(record?.modules);
+    if (f.special === "list") {
+      // outcomes / tools live inside courseOutline on the real record
+      values[f.name] = listToText(outline[f.name] ?? record?.[f.name]);
       return;
     }
-    if (f.special === "faqs") {
-      values[f.name] = faqsToText(record?.faqs);
+    if (f.special === "curriculum") {
+      values[f.name] = curriculumToText(outline.curriculum ?? record?.curriculum);
       return;
     }
+    if (f.name === "instructor_name") {
+      values[f.name] = outline.instructor?.name ?? "";
+      return;
+    }
+    if (f.name === "instructor_role") {
+      values[f.name] = outline.instructor?.role ?? "";
+      return;
+    }
+    if (f.name === "instructor_bio") {
+      values[f.name] = outline.instructor?.bio ?? "";
+      return;
+    }
+    if (f.name === "intro" || f.name === "whoFor") {
+      values[f.name] = outline[f.name] ?? record?.[f.name] ?? "";
+      return;
+    }
+
     const raw = record ? record[f.name] : undefined;
     if (f.type === "checkbox") {
       values[f.name] = raw ?? f.default ?? false;
@@ -67,15 +91,20 @@ export default function EntityForm({ entity, record, onSubmit, onCancel }: Props
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const data: Record<string, any> = {};
+    const outlineFieldNames = new Set([
+      "intro",
+      "outcomes",
+      "tools",
+      "whoFor",
+      "instructor_name",
+      "instructor_role",
+      "instructor_bio",
+      "curriculum",
+    ]);
+    const hasOutlineFields = entity.fields.some((f) => outlineFieldNames.has(f.name));
+
     entity.fields.forEach((f) => {
-      if (f.special === "modules") {
-        data.modules = textToModules(values[f.name] || "");
-        return;
-      }
-      if (f.special === "faqs") {
-        data.faqs = textToFaqs(values[f.name] || "");
-        return;
-      }
+      if (outlineFieldNames.has(f.name)) return; // handled separately below
       if (f.type === "number") {
         const v = values[f.name];
         data[f.name] = v === "" || v === null || v === undefined ? null : Number(v);
@@ -83,6 +112,22 @@ export default function EntityForm({ entity, record, onSubmit, onCancel }: Props
         data[f.name] = values[f.name];
       }
     });
+
+    if (hasOutlineFields) {
+      data.courseOutline = {
+        intro: values.intro || "",
+        outcomes: textToList(values.outcomes || ""),
+        tools: textToList(values.tools || ""),
+        whoFor: values.whoFor || "",
+        instructor: {
+          name: values.instructor_name || "",
+          role: values.instructor_role || "",
+          bio: values.instructor_bio || "",
+        },
+        curriculum: textToCurriculum(values.curriculum || ""),
+      };
+    }
+
     onSubmit(data);
   }
 
@@ -104,8 +149,8 @@ function FieldInput({ field, value, onChange }: { field: FieldConfig; value: any
     return (
       <div className="field">
         <label>{field.label}</label>
-        <select 
-          value={value ? "true" : "false"} 
+        <select
+          value={value ? "true" : "false"}
           onChange={(e) => onChange(e.target.value === "true")}
         >
           <option value="true">Active</option>
@@ -129,6 +174,7 @@ function FieldInput({ field, value, onChange }: { field: FieldConfig; value: any
           onChange={(e) => onChange(e.target.value)}
           placeholder={field.hint}
         />
+        {field.hint && <small className="field-hint">{field.hint}</small>}
       </div>
     );
   }

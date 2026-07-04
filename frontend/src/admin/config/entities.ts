@@ -20,11 +20,11 @@ export interface FieldConfig {
   rows?: number;
   step?: string;
   options?: string[];
-  /** "modules" / "faqs" — custom line-based editors for Course sub-tables */
-  special?: "modules" | "faqs";
+  /** custom line-based editors for sub-structures */
+  special?: "modules" | "faqs" | "list" | "curriculum";
 }
 
-export type ColumnRender = "boolean" | "status" | "draftpill" | "readpill";
+export type ColumnRender = "boolean" | "status" | "draftpill" | "readpill" | "image";
 
 export interface ColumnConfig {
   key: string;
@@ -64,29 +64,38 @@ export const ENTITIES: Record<string, EntityConfig> = {
       { name: "is_active", label: "Active", type: "checkbox", default: true }
     ]
   },
-courses: {
-  key: "courses",
-  label: "Courses",
-  description: "Manage your academic courses, outlines, and FAQs.",
-  icon: "📚",
-  columns: [
-    { key: "title", label: "Course Title", primary: true, sub: "slug" },
-    { key: "category", label: "Category" },
-    { key: "duration", label: "Duration" },
-    { key: "is_active", label: "Status", render: "boolean" }
-  ],
-  fields: [
-    { name: "title", label: "Course Title", type: "text", required: true },
-    { name: "slug", label: "Slug", type: "text", required: true, hint: "e.g. video-editing-mastery" },
-    { name: "category", label: "Category", type: "text", required: true },
-    { name: "duration", label: "Duration", type: "text", required: true, hint: "e.g. 3 Months or 12 Weeks" },
-    { name: "image_url", label: "Cover Image URL", type: "text" },
-    { name: "description", label: "Description", type: "textarea" },
-    { name: "modules", label: "Course Outline", type: "textarea", special: "modules", hint: "Format: Title | Description | Duration" },
-    { name: "faqs", label: "FAQs", type: "textarea", special: "faqs", hint: "Format: Question | Answer" },
-    { name: "is_active", label: "Status", type: "checkbox", default: true }
-  ]
-},
+
+  courses: {
+    key: "courses",
+    label: "Courses",
+    description: "Manage your academic courses, outlines, and FAQs.",
+    icon: "📚",
+    columns: [
+      { key: "title", label: "Course Title", primary: true, sub: "slug" },
+      { key: "category", label: "Category" },
+      { key: "duration", label: "Duration" },
+      { key: "isActive", label: "Status", render: "boolean" }
+    ],
+    fields: [
+      { name: "title", label: "Course Title", type: "text", required: true },
+      { name: "category", label: "Category", type: "text", required: true },
+      { name: "duration", label: "Duration", type: "text", required: true, hint: "e.g. 3 Months or 12 Weeks" },
+      { name: "thumbnailImage", label: "Cover Image URL", type: "text" },
+      { name: "description", label: "Description", type: "textarea" },
+
+      // --- everything below gets packaged into courseOutline by EntityForm ---
+      { name: "intro", label: "Intro", type: "textarea", hint: "Shown at the top of the course detail page." },
+      { name: "outcomes", label: "Outcomes", type: "textarea", special: "list", hint: "One outcome per line." },
+      { name: "tools", label: "Tools / Tech Covered", type: "textarea", special: "list", hint: "One tool per line." },
+      { name: "whoFor", label: "Who This Course Is For", type: "textarea" },
+      { name: "instructor_name", label: "Instructor Name", type: "text" },
+      { name: "instructor_role", label: "Instructor Role", type: "text" },
+      { name: "instructor_bio", label: "Instructor Bio", type: "textarea" },
+      { name: "curriculum", label: "Curriculum", type: "textarea", special: "curriculum", hint: "Format: Title | Duration | Body (one module per line)" },
+
+      { name: "isActive", label: "Status", type: "checkbox", default: true }
+    ]
+  },
 
   success_stories: {
     key: "success_stories",
@@ -109,25 +118,25 @@ courses: {
     ]
   },
 
-team_members: {
-  key: "team_members",
-  label: "Team Members",
-  description: "Manage the core team and instructors shown on the About page.",
-  icon: "👥",
-  columns: [
-    { key: "image_url", label: "Image", render: "image" as any },
-    { key: "name", label: "Name", primary: true, sub: "designation" },
-    { key: "designation", label: "Designation" },
-    { key: "display_order", label: "Order" }
-  ],
-  fields: [
-    { name: "name", label: "Name", type: "text", required: true },
-    { name: "designation", label: "Designation", type: "text", required: true },
-    { name: "image_url", label: "Profile Image URL", type: "text", hint: "e.g. /images/team/member.jpg or a remote URL" },
-    { name: "bio", label: "Bio", type: "textarea" },
-    { name: "display_order", label: "Display Order", type: "number", default: 0 }
-  ]
-},
+  team_members: {
+    key: "team_members",
+    label: "Team Members",
+    description: "Manage the core team and instructors shown on the About page.",
+    icon: "👥",
+    columns: [
+      { key: "image_url", label: "Image", render: "image" },
+      { key: "name", label: "Name", primary: true, sub: "designation" },
+      { key: "designation", label: "Designation" },
+      { key: "display_order", label: "Order" }
+    ],
+    fields: [
+      { name: "name", label: "Name", type: "text", required: true },
+      { name: "designation", label: "Designation", type: "text", required: true },
+      { name: "image_url", label: "Profile Image URL", type: "text", hint: "e.g. /images/team/member.jpg or a remote URL" },
+      { name: "bio", label: "Bio", type: "textarea" },
+      { name: "display_order", label: "Display Order", type: "number", default: 0 }
+    ]
+  },
 
   branches: {
     key: "branches",
@@ -147,32 +156,33 @@ team_members: {
   },
 
   blog_posts: {
-  key: "blog_posts",
-  label: "Blog Posts",
-  description: "Manage your articles, news updates, and insights.",
-  icon: "✍️",
-  columns: [
-    { key: "title", label: "Title", primary: true, sub: "slug" },
-    { key: "category", label: "Category" }, // Adds Category column right after Title
-    { key: "status", label: "Status", render: "draftpill" },
-    { key: "published_at", label: "Published Date" }
-  ],
-  fields: [
-    { name: "title", label: "Title", type: "text", required: true },
-    { name: "slug", label: "Slug", type: "text", required: true, hint: "e.g. future-of-ai-2026" },
-    { 
-      name: "category", 
-      label: "Category", 
-      type: "select", 
-      options: ["Artificial Intelligence", "Tech Trends", "Programming", "Machine Learning", "General"],
-      required: true 
-    }, // Adds Category drop-down selection field right after Title input
-    { name: "status", label: "Status", type: "select", options: ["draft", "published"], default: "draft" },
-    { name: "image_url", label: "Featured Image URL", type: "text" },
-    { name: "summary", label: "Summary", type: "textarea", hint: "Short excerpt shown on the blog feed index grid." },
-    { name: "content", label: "Body Content", type: "textarea", rows: 12 }
-  ]
-},
+    key: "blog_posts",
+    label: "Blog Posts",
+    description: "Manage your articles, news updates, and insights.",
+    icon: "✍️",
+    columns: [
+      { key: "title", label: "Title", primary: true, sub: "slug" },
+      { key: "category", label: "Category" },
+      { key: "status", label: "Status", render: "draftpill" },
+      { key: "published_at", label: "Published Date" }
+    ],
+    fields: [
+      { name: "title", label: "Title", type: "text", required: true },
+      { name: "slug", label: "Slug", type: "text", required: true, hint: "e.g. future-of-ai-2026" },
+      {
+        name: "category",
+        label: "Category",
+        type: "select",
+        options: ["Artificial Intelligence", "Tech Trends", "Programming", "Machine Learning", "General"],
+        required: true
+      },
+      { name: "status", label: "Status", type: "select", options: ["draft", "published"], default: "draft" },
+      { name: "image_url", label: "Featured Image URL", type: "text" },
+      { name: "summary", label: "Summary", type: "textarea", hint: "Short excerpt shown on the blog feed index grid." },
+      { name: "content", label: "Body Content", type: "textarea", rows: 12 }
+    ]
+  },
+
   media_uploads: {
     key: "media_uploads",
     label: "Media Library",

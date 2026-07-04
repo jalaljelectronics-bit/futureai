@@ -1,12 +1,33 @@
 const { z } = require('zod');
 
+const courseInstructorSchema = z.object({
+  name: z.string().optional(),
+  role: z.string().optional(),
+  bio: z.string().optional(),
+});
+
+const courseCurriculumItemSchema = z.object({
+  title: z.string(),
+  dur: z.string().optional(),
+  body: z.string().optional(),
+});
+
+const courseOutlineSchema = z.object({
+  intro: z.string().optional(),
+  outcomes: z.array(z.string()).optional(),
+  tools: z.array(z.string()).optional(),
+  whoFor: z.string().optional(),
+  instructor: courseInstructorSchema.optional(),
+  curriculum: z.array(courseCurriculumItemSchema).optional(),
+});
+
 const courseSchema = z.object({
   title: z.string().min(2).max(150),
   category: z.string().max(100).optional(),
   duration: z.string().max(50).optional(),
   description: z.string().optional(),
   thumbnailImage: z.string().max(255).optional(),
-  isFeatured: z.boolean().optional(),
+  courseOutline: courseOutlineSchema.optional(),
   isActive: z.boolean().optional(),
 });
 

@@ -31,25 +31,37 @@ export default function EntitySection({ section }: Props) {
     setEditingId(null);
   }
 
-  function handleSubmit(data: Record<string, any>) {
-    if (editingId === "new") {
-      addRecord(section, data);
-      show(`${label} created.`);
-    } else if (typeof editingId === "number") {
-      updateRecord(section, editingId, data);
-      show(`${label} updated.`);
+  async function handleSubmit(data: Record<string, any>) {
+    try {
+      if (editingId === "new") {
+        await addRecord(section, data);
+        show(`${label} created.`);
+      } else if (typeof editingId === "number") {
+        await updateRecord(section, editingId, data);
+        show(`${label} updated.`);
+      }
+      closeForm();
+    } catch (err: any) {
+      console.error(`Failed to save ${label}:`, err);
+      const message = err?.response?.data?.message || `Failed to save ${label.toLowerCase()}.`;
+      show(message);
     }
-    closeForm();
   }
 
-  function handleDelete(id: number) {
+  async function handleDelete(id: number) {
     if (!window.confirm(`Delete this ${label.toLowerCase()}? This can't be undone.`)) return;
-    deleteRecord(section, id);
-    show(`${label} deleted.`);
+    try {
+      await deleteRecord(section, id);
+      show(`${label} deleted.`);
+    } catch (err: any) {
+      console.error(`Failed to delete ${label}:`, err);
+      const message = err?.response?.data?.message || `Failed to delete ${label.toLowerCase()}.`;
+      show(message);
+    }
   }
 
-  function handleToggleRead(row: AnyRecord) {
-    updateRecord(section, row.id, { is_read: !row.is_read });
+  async function handleToggleRead(row: AnyRecord) {
+    await updateRecord(section, row.id, { is_read: !row.is_read });
     show("Submission updated.");
   }
 

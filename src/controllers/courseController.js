@@ -10,9 +10,25 @@ function slugify(text) {
     .replace(/\s+/g, '-');
 }
 
+// Turn the stored courseOutline string back into an object before
+// sending a course to the client. Malformed/missing JSON -> null,
+// rather than crashing the response.
+function serializeCourse(course) {
+  if (!course) return course;
+  let courseOutline = null;
+  if (course.courseOutline) {
+    try {
+      courseOutline = JSON.parse(course.courseOutline);
+    } catch (err) {
+      courseOutline = null;
+    }
+  }
+  return { ...course, courseOutline };
+}
+
 // ------------------------------------------------------------
 // PUBLIC: GET /api/courses
-// Query params: ?featured=true  ?category=E-Commerce
+// Query params: ?category=E-Commerce
 // ------------------------------------------------------------
 exports.getAllCourses = asyncHandler(async (req, res) => {
   const { category } = req.query;
@@ -27,8 +43,9 @@ exports.getAllCourses = asyncHandler(async (req, res) => {
     },
   });
 
-  res.json(courses);
+  res.json(courses.map(serializeCourse));
 });
+
 // ------------------------------------------------------------
 // PUBLIC: GET /api/courses/:slug
 // ------------------------------------------------------------
@@ -45,36 +62,43 @@ exports.getCourseBySlug = asyncHandler(async (req, res) => {
     throw err;
   }
 
-  res.json(course);
+  res.json(serializeCourse(course));
 });
 
 // ------------------------------------------------------------
 // ADMIN: POST /api/admin/courses
 // ------------------------------------------------------------
 exports.createCourse = asyncHandler(async (req, res) => {
+  const { courseOutline, ...rest } = req.body;
   const slug = slugify(req.body.title);
 
   const course = await prisma.course.create({
     data: {
-      ...req.body,
+      ...rest,
       slug,
+      courseOutline: courseOutline ? JSON.stringify(courseOutline) : undefined,
     },
   });
 
-  res.status(201).json(course);
+  res.status(201).json(serializeCourse(course));
 });
+
 // ------------------------------------------------------------
 // ADMIN: PUT /api/admin/courses/:id
 // ------------------------------------------------------------
 exports.updateCourse = asyncHandler(async (req, res) => {
   const id = Number(req.params.id);
+  const { courseOutline, ...rest } = req.body;
 
   const course = await prisma.course.update({
     where: { id },
-    data: req.body,
+    data: {
+      ...rest,
+      ...(courseOutline !== undefined ? { courseOutline: JSON.stringify(courseOutline) } : {}),
+    },
   });
 
-  res.json(course);
+  res.json(serializeCourse(course));
 });
 
 // ------------------------------------------------------------
