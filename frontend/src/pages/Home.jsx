@@ -158,10 +158,10 @@ export default function Home() {
             <h2>The jobs market changed. We built the academy for it.</h2>
           </div>
           <div className="stats-strip">
-            <div className="stat-box"><b><CountUp end={60} suffix="%+" /></b><span>Youth underemployment in traditional job markets</span></div>
-            <div className="stat-box"><b><CountUp end={1} prefix="$" suffix="T+" /></b><span>Global freelance economy, growing every year</span></div>
+            <div className="stat-box"><b>60%</b><span>Youth underemployment in traditional job markets</span></div>
+            <div className="stat-box"><b>T+</b><span>Global freelance economy, growing every year</span></div>
             <div className="stat-box"><b>0</b><span>Degree required to start earning online</span></div>
-            <div className="stat-box"><b><CountUp end={12} /></b><span>Weeks, on average, to a first paid client</span></div>
+            <div className="stat-box"><b className="countup-force-color">12</b><span>Weeks, on average, to a first paid client</span></div>
           </div>
         </div>
       </section>
@@ -174,7 +174,7 @@ export default function Home() {
               <h3>Expanding into software with Vision Giants</h3>
               <p>Our sister campus focuses on web &amp; app development — for students who want to go further into tech.</p>
             </div>
-            <a href="https://visiongiants.example.com" target="_blank" rel="noopener noreferrer" className="btn btn-accent">Visit Vision Giants ↗</a>
+            <a href="https://vgiants.com" target="_blank" rel="noopener noreferrer" className="btn btn-accent">Visit Vision Giants ↗</a>
           </div>
         </div>
       </section>
