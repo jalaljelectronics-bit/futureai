@@ -1,12 +1,15 @@
 import { useState } from 'react';
 import useStudentCount from '../hooks/useStudentCount.js';
-import COURSE_DATA from '../data/courseData.js';
+import { useData } from '../admin/context/DataContext.tsx';
+import { getCourseList } from '../data/courseHelpers.js';
 import { submitContactForm } from '../api/contactApi';
 
 const EMPTY_FORM = { name: '', phone: '', email: '', course: '', message: '' };
 
 export default function Contact() {
   const { count, increment } = useStudentCount();
+  const { db } = useData();
+  const courses = getCourseList(db.courses);
   const [form, setForm] = useState(EMPTY_FORM);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -67,28 +70,28 @@ export default function Contact() {
           <div className="contact-grid">
             <div>
               <div className="eyebrow">Contact Details</div>
-              <h2 style={{ fontSize: '1.6rem' }}>We're on campus, on call, and online.</h2>
+              <h2 style={{ fontSize: '1.6rem' }}>We're on campus</h2>
 
               <div className="contact-info-item">
                 <div className="ic">📍</div>
-                <div><h4>Campus Address</h4><p>Future AI Skills, Shujabad, Punjab, Pakistan</p></div>
+                <div><h4>Campus Address</h4><p>Near Muhammadia Masjid, Noble Grammar School, Housing Colony, Shujabad, Punjab, Pakistan</p></div>
               </div>
               <div className="contact-info-item">
                 <div className="ic">📞</div>
-                <div><h4>Phone / WhatsApp</h4><p>+92 300 0000000</p></div>
+                <div><h4>Phone / WhatsApp</h4><p>+92 300 8739555</p></div>
               </div>
               <div className="contact-info-item">
                 <div className="ic">✉️</div>
-                <div><h4>Email</h4><p>hello@futureaiskills.pk</p></div>
+                <div><h4>Email</h4><p>futureaiskills.007@gmail.com</p></div>
               </div>
               <div className="contact-info-item">
                 <div className="ic">🕐</div>
-                <div><h4>Campus Hours</h4><p>Mon – Sat, 10:00 AM – 7:00 PM</p></div>
+                <div><h4>Campus Hours</h4><p>Mon – Fri, 5:30 – 9:00 PM</p></div>
               </div>
 
               <div className="map-frame">
                 <iframe
-                  src="https://www.google.com/maps?q=Shujabad,Punjab,Pakistan&output=embed"
+                  src="https://www.google.com/maps?q=Noble+Grammar+School+Near+Muhammadia+Masjid+Housing+Colony+Shujabad+Punjab+Pakistan&output=embed"
                   width="100%" height="100%" style={{ border: 0 }} loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade" title="Future AI Skills campus location"
                 />
@@ -99,7 +102,7 @@ export default function Contact() {
               <form className="form" onSubmit={handleSubmit}>
                 {submitted && (
                   <div className="form-success show">
-                    Thanks — your message has been sent. We'll reply within one working day.
+                    Thanks — your message has been sent. We'll reply in a short while.
                   </div>
                 )}
                 {error && (
@@ -125,8 +128,8 @@ export default function Contact() {
                   <label htmlFor="cf-course">Course you're interested in</label>
                   <select id="cf-course" name="course" value={form.course} onChange={handleChange}>
                     <option value="">Not sure yet — general enquiry</option>
-                    {Object.entries(COURSE_DATA).map(([slug, c]) => (
-                      <option value={c.title} key={slug}>{c.title}</option>
+                    {courses.map((c) => (
+                      <option value={c.title} key={c.slug}>{c.title}</option>
                     ))}
                   </select>
                 </div>

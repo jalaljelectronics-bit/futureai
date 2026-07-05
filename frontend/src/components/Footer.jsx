@@ -80,13 +80,13 @@ export default function Footer() {
             <ul>
               <li>Shujabad, Punjab, Punjab</li>
               <li>+92 300 8739555</li>
-              <li>futureaiskills.007@gmail.com</li>
+              <li><a href="https://mail.google.com/mail/?view=cm&to=futureaiskills.007@gmail.com" target="_blank" rel="noopener noreferrer">futureaiskills.007@gmail.com</a></li>
             </ul>
           </div>
           <div className="footer-col">
             <h5>Our Network</h5>
             <ul>
-              <li><a href="https://visiongiants.example.com" target="_blank" rel="noopener noreferrer">Vision Giants ↗</a></li>
+              <li><a href="https://vgiants.com" target="_blank" rel="noopener noreferrer">Vision Giants ↗</a></li>
               <li>Sister campus — web &amp; app dev</li>
             </ul>
           </div>
