@@ -1,7 +1,119 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import type { EntityConfig, FieldConfig } from "../config/entities";
-import type { AnyRecord } from "../types";
-import { useData } from "../context/DataContext";
+import type { AnyRecord, CourseModule, CourseFAQ } from "../types";
+
+const MAX_IMAGE_BYTES = 3 * 1024 * 1024; // 3 MB
+
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * Image upload field. Reads the chosen file into a base64 data URL that gets
+ * stored straight on the record (the app's data layer is in-memory, so the
+ * image is immediately available across the admin panel and the public site).
+ * A URL box is offered as an alternative for images already hosted elsewhere.
+ *
+ * With a real backend you'd POST the File to an upload endpoint here and store
+ * the returned URL instead of the data URL — the rest of the app is unchanged.
+ */
+function FileField({
+  field,
+  value,
+  onChange,
+}: {
+  field: FieldConfig;
+  value: any;
+  onChange: (v: any) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setError(null);
+    if (!file.type.startsWith("image/")) {
+      setError("Please choose an image file.");
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      setError("Image is larger than 3 MB — please pick a smaller one.");
+      return;
+    }
+    try {
+      setBusy(true);
+      onChange(await readFileAsDataUrl(file));
+    } catch {
+      setError("Could not read that file. Try another image.");
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  const hasImage = typeof value === "string" && value.trim() !== "";
+
+  return (
+    <div className="field">
+      <label>
+        {field.label}
+        {field.required ? " *" : ""}
+      </label>
+
+      <div className="upload-row">
+        <div className={`upload-preview${hasImage ? "" : " is-empty"}`}>
+          {hasImage ? <img src={value} alt="Preview" /> : <span>No image</span>}
+        </div>
+
+        <div className="upload-controls">
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/*"
+            className="upload-input"
+            onChange={handleFile}
+          />
+          <div className="upload-buttons">
+            <button
+              type="button"
+              className="btn btn-outline btn-sm"
+              disabled={busy}
+              onClick={() => inputRef.current?.click()}
+            >
+              {busy ? "Reading…" : hasImage ? "Replace image" : "Upload image"}
+            </button>
+            {hasImage && (
+              <button
+                type="button"
+                className="btn btn-danger btn-sm"
+                onClick={() => onChange("")}
+              >
+                Remove
+              </button>
+            )}
+          </div>
+          <input
+            type="text"
+            className="upload-url"
+            placeholder="…or paste an image URL"
+            value={hasImage && value.startsWith("data:") ? "" : value ?? ""}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {field.hint && !error && <div className="upload-hint">{field.hint}</div>}
+      {error && <div className="upload-error">{error}</div>}
+    </div>
+  );
+}
 
 interface Props {
   entity: EntityConfig;
@@ -10,36 +122,44 @@ interface Props {
   onCancel: () => void;
 }
 
-// ---- curriculum helpers: Title | Duration | Body per line ----
-interface CurriculumItem {
-  title: string;
-  dur: string;
-  body: string;
+function modulesToText(modules: CourseModule[] | undefined): string {
+  return (modules || []).map((m) => `${m.module_title} | ${m.module_description || ""} | ${m.module_duration || ""}`).join("\n");
 }
-function curriculumToText(items: CurriculumItem[] | undefined): string {
-  return (items || []).map((m) => `${m.title} | ${m.dur || ""} | ${m.body || ""}`).join("\n");
+function textToModules(text: string): CourseModule[] {
+  return text
+    .split("\n")
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((line, i) => {
+      const [module_title, module_description, module_duration] = line.split("|").map((s) => (s || "").trim());
+      return { module_title, module_description, module_duration, module_order: i + 1 };
+    });
 }
-function textToCurriculum(text: string): CurriculumItem[] {
+function faqsToText(faqs: CourseFAQ[] | undefined): string {
+  return (faqs || []).map((f) => `${f.question} | ${f.answer}`).join("\n");
+}
+function textToFaqs(text: string): CourseFAQ[] {
   return text
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean)
     .map((line) => {
-      const [title, dur, body] = line.split("|").map((s) => (s || "").trim());
-      return { title, dur, body };
+      const [question, answer] = line.split("|").map((s) => (s || "").trim());
+      return { question, answer };
     });
 }
 
 function initialValues(fields: FieldConfig[], record: AnyRecord | null): Record<string, any> {
   const values: Record<string, any> = {};
-  const outline = record?.courseOutline || {};
-
   fields.forEach((f) => {
-    if (f.special === "curriculum") {
-      values[f.name] = curriculumToText(outline.curriculum);
+    if (f.special === "modules") {
+      values[f.name] = modulesToText(record?.modules);
       return;
     }
-
+    if (f.special === "faqs") {
+      values[f.name] = faqsToText(record?.faqs);
+      return;
+    }
     const raw = record ? record[f.name] : undefined;
     if (f.type === "checkbox") {
       values[f.name] = raw ?? f.default ?? false;
@@ -53,11 +173,6 @@ function initialValues(fields: FieldConfig[], record: AnyRecord | null): Record<
 export default function EntityForm({ entity, record, onSubmit, onCancel }: Props) {
   const [values, setValues] = useState<Record<string, any>>(() => initialValues(entity.fields, record));
 
-  // Only needed for course-select fields (Success Stories linking to a Course).
-  // Courses are already loaded in DataContext, so no extra fetch here.
-  const { db } = useData();
-  const courses = (db.courses as any) || [];
-
   function setField(name: string, value: any) {
     setValues((prev) => ({ ...prev, [name]: value }));
   }
@@ -65,19 +180,15 @@ export default function EntityForm({ entity, record, onSubmit, onCancel }: Props
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const data: Record<string, any> = {};
-    const hasCurriculumField = entity.fields.some((f) => f.special === "curriculum");
-
     entity.fields.forEach((f) => {
-      if (f.special === "curriculum") return; // handled separately below
-
-      if (f.special === "course-select") {
-        // Dropdown value is a string (or "" for none) — convert to a real
-        // number or null before it hits the courseId FK on the backend.
-        const v = values[f.name];
-        data[f.name] = v === "" || v === null || v === undefined ? null : Number(v);
+      if (f.special === "modules") {
+        data.modules = textToModules(values[f.name] || "");
         return;
       }
-
+      if (f.special === "faqs") {
+        data.faqs = textToFaqs(values[f.name] || "");
+        return;
+      }
       if (f.type === "number") {
         const v = values[f.name];
         data[f.name] = v === "" || v === null || v === undefined ? null : Number(v);
@@ -85,27 +196,13 @@ export default function EntityForm({ entity, record, onSubmit, onCancel }: Props
         data[f.name] = values[f.name];
       }
     });
-
-    if (hasCurriculumField) {
-      const curriculumFieldName = entity.fields.find((f) => f.special === "curriculum")!.name;
-      data.courseOutline = {
-        curriculum: textToCurriculum(values[curriculumFieldName] || ""),
-      };
-    }
-
     onSubmit(data);
   }
 
   return (
     <form onSubmit={handleSubmit}>
       {entity.fields.map((f) => (
-        <FieldInput
-          key={f.name}
-          field={f}
-          value={values[f.name]}
-          onChange={(v) => setField(f.name, v)}
-          courses={courses}
-        />
+        <FieldInput key={f.name} field={f} value={values[f.name]} onChange={(v) => setField(f.name, v)} />
       ))}
       <div className="modal-actions">
         <button type="button" className="btn btn-outline" onClick={onCancel}>Cancel</button>
@@ -115,38 +212,13 @@ export default function EntityForm({ entity, record, onSubmit, onCancel }: Props
   );
 }
 
-function FieldInput({
-  field,
-  value,
-  onChange,
-  courses,
-}: {
-  field: FieldConfig;
-  value: any;
-  onChange: (v: any) => void;
-  courses: { id: number; title: string }[];
-}) {
-  if (field.special === "course-select") {
+function FieldInput({ field, value, onChange }: { field: FieldConfig; value: any; onChange: (v: any) => void }) {
+  if (field.type === "checkbox" || field.name === "is_active" || field.name === "active") {
     return (
       <div className="field">
         <label>{field.label}</label>
-        <select value={value ?? ""} onChange={(e) => onChange(e.target.value)}>
-          <option value="">— None —</option>
-          {courses.map((c) => (
-            <option key={c.id} value={c.id}>{c.title}</option>
-          ))}
-        </select>
-        {field.hint && <small className="field-hint">{field.hint}</small>}
-      </div>
-    );
-  }
-
-  if (field.type === "checkbox" || field.name === "isActive" || field.name === "is_active" || field.name === "active") {
-    return (
-      <div className="field">
-        <label>{field.label}</label>
-        <select
-          value={value ? "true" : "false"}
+        <select 
+          value={value ? "true" : "false"} 
           onChange={(e) => onChange(e.target.value === "true")}
         >
           <option value="true">Active</option>
@@ -170,7 +242,6 @@ function FieldInput({
           onChange={(e) => onChange(e.target.value)}
           placeholder={field.hint}
         />
-        {field.hint && <small className="field-hint">{field.hint}</small>}
       </div>
     );
   }
@@ -189,13 +260,7 @@ function FieldInput({
   }
 
   if (field.type === "file") {
-    return (
-      <div className="field">
-        <label>{field.label}</label>
-        <input type="file" onChange={() => onChange(value)} />
-        {field.hint && <small className="field-hint">{field.hint}</small>}
-      </div>
-    );
+    return <FileField field={field} value={value} onChange={onChange} />;
   }
 
   return (
