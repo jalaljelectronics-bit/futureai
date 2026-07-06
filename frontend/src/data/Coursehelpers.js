@@ -3,15 +3,14 @@
 // shared DataContext) with the original hand-written rich content
 // in courseData.js (intro, outcomes, tools, instructor bio, etc).
 //
-// Why this exists: the admin panel manages courses via
-// courseOutline (intro, outcomes, tools, whoFor, instructor,
-// curriculum) alongside the plain columns (title, slug, duration...).
-// The original 6 courses also have long-form marketing copy
-// hand-written in courseData.js. For any course whose slug matches
-// one of the original 6, we use its courseOutline content first,
-// and only fall back to the hardcoded copy for fields the admin
-// hasn't filled in. Any brand-new course added purely through the
-// admin panel renders correctly with whatever it has.
+// Why this exists: the admin panel only manages the "database"
+// shape of a course (title, slug, duration, modules...). The
+// original 6 courses also have long-form marketing copy that
+// isn't something you'd want to manage as a plain-text admin
+// field. So for courses that match one of the original 6 slugs,
+// we keep the rich copy. Any brand-new course added purely
+// through the admin panel still renders correctly with a
+// simpler layout (those extra sections just don't show).
 // ============================================================
 import COURSE_DATA from './courseData.js';
 
@@ -29,29 +28,29 @@ function tagFor(category) {
 
 export function mergeCourse(adminCourse) {
   const extra = COURSE_DATA[adminCourse.slug];
-  const outline = adminCourse.courseOutline || {};
-
   const tag = extra ? { tagLabel: extra.tagLabel, tagClass: extra.tagClass } : tagFor(adminCourse.category);
 
-  const curriculum =
-    outline.curriculum && outline.curriculum.length
-      ? outline.curriculum
-      : (extra?.curriculum || []);
+  const curriculum = adminCourse.modules && adminCourse.modules.length
+    ? adminCourse.modules.map((m) => ({ title: m.module_title, dur: m.module_duration || '', body: m.module_description || '' }))
+    : (extra?.curriculum || []);
 
   return {
     slug: adminCourse.slug,
     title: adminCourse.title,
     category: adminCourse.category,
     duration: adminCourse.duration,
+    thumbnail: adminCourse.thumbnail_image || '',
     rating: adminCourse.rating ?? extra?.rating ?? '5.0',
-    reviews: adminCourse.reviewCount ?? extra?.reviews ?? 0,
+    reviews: adminCourse.review_count ?? extra?.reviews ?? 0,
     summary: adminCourse.description || extra?.summary || '',
-    intro: outline.intro || extra?.intro || adminCourse.description || '',
-    outcomes: (outline.outcomes && outline.outcomes.length ? outline.outcomes : null) || extra?.outcomes || null,
-    tools: (outline.tools && outline.tools.length ? outline.tools : null) || extra?.tools || null,
-    whoFor: outline.whoFor || extra?.whoFor || null,
+    intro: extra?.intro || adminCourse.description || '',
+    outcomes: extra?.outcomes || null,
+    tools: extra?.tools || null,
+    whoFor: extra?.whoFor || null,
+    instructor: extra?.instructor || null,
     curriculum,
-    displayOrder: adminCourse.displayOrder ?? 999,
+    isFeatured: !!adminCourse.is_featured,
+    displayOrder: adminCourse.display_order ?? 999,
     ...tag,
   };
 }
@@ -59,12 +58,12 @@ export function mergeCourse(adminCourse) {
 // All active courses, in admin display-order, for list pages.
 export function getCourseList(dbCourses) {
   return dbCourses
-    .filter((c) => c.isActive !== false)
+    .filter((c) => c.is_active !== false)
     .map(mergeCourse)
     .sort((a, b) => a.displayOrder - b.displayOrder);
 }
 
 export function getCourseBySlug(dbCourses, slug) {
-  const found = dbCourses.find((c) => c.slug === slug && c.isActive !== false);
+  const found = dbCourses.find((c) => c.slug === slug && c.is_active !== false);
   return found ? mergeCourse(found) : null;
 }
