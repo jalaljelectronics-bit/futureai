@@ -20,22 +20,22 @@ export async function getAllBlogPostsAdmin() {
   return data;
 }
 
-export async function getBlogPostByIdAdmin(id) {
+export async function getBlogPostByIdAdmin(id: number) {
   const { data } = await adminApi.get(`/${id}`);
   return data;
 }
 
-export async function createBlogPost(payload) {
+export async function createBlogPost(payload: Record<string, any>) {
   const { data } = await adminApi.post('/', payload);
   return data;
 }
 
-export async function updateBlogPost(id, payload) {
+export async function updateBlogPost(id: number, payload: Record<string, any>) {
   const { data } = await adminApi.put(`/${id}`, payload);
   return data;
 }
 
-export async function deleteBlogPost(id) {
+export async function deleteBlogPost(id: number) {
   await adminApi.delete(`/${id}`);
   return true;
 }
@@ -47,7 +47,7 @@ export async function getPublishedBlogPosts() {
   return data;
 }
 
-export async function getPublishedBlogPostBySlug(slug) {
+export async function getPublishedBlogPostBySlug(slug: string) {
   const { data } = await publicApi.get(`/${slug}`);
   return data;
 }

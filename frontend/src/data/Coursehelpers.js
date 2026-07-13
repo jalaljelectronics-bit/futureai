@@ -30,8 +30,10 @@ export function mergeCourse(adminCourse) {
   const extra = COURSE_DATA[adminCourse.slug];
   const tag = extra ? { tagLabel: extra.tagLabel, tagClass: extra.tagClass } : tagFor(adminCourse.category);
 
-  const curriculum = adminCourse.modules && adminCourse.modules.length
-    ? adminCourse.modules.map((m) => ({ title: m.module_title, dur: m.module_duration || '', body: m.module_description || '' }))
+  const outline = adminCourse.courseOutline || {};
+
+  const curriculum = outline.curriculum && outline.curriculum.length
+    ? outline.curriculum
     : (extra?.curriculum || []);
 
   return {
@@ -39,18 +41,17 @@ export function mergeCourse(adminCourse) {
     title: adminCourse.title,
     category: adminCourse.category,
     duration: adminCourse.duration,
-    thumbnail: adminCourse.thumbnail_image || '',
+    thumbnail: adminCourse.thumbnailImage || '',
     rating: adminCourse.rating ?? extra?.rating ?? '5.0',
-    reviews: adminCourse.review_count ?? extra?.reviews ?? 0,
+    reviews: adminCourse.reviewCount ?? extra?.reviews ?? 0,
     summary: adminCourse.description || extra?.summary || '',
-    intro: extra?.intro || adminCourse.description || '',
-    outcomes: extra?.outcomes || null,
-    tools: extra?.tools || null,
-    whoFor: extra?.whoFor || null,
+    intro: outline.intro || extra?.intro || adminCourse.description || '',
+    outcomes: outline.outcomes || extra?.outcomes || null,
+    tools: outline.tools || extra?.tools || null,
+    whoFor: outline.whoFor || extra?.whoFor || null,
     instructor: extra?.instructor || null,
     curriculum,
-    isFeatured: !!adminCourse.is_featured,
-    displayOrder: adminCourse.display_order ?? 999,
+    displayOrder: adminCourse.displayOrder ?? 999,
     ...tag,
   };
 }

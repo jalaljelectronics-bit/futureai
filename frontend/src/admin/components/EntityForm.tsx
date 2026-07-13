@@ -5,19 +5,11 @@ import { useData } from "../context/DataContext";
 
 const MAX_IMAGE_BYTES = 3 * 1024 * 1024; // 3 MB
 
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
-
 /**
- * Image upload field. Reads the chosen file into a base64 data URL that gets
- * stored straight on the record. A URL box is offered as an alternative for
- * images already hosted elsewhere (e.g. Cloudinary).
+ * Image upload field. Passes the raw File object through onChange so the
+ * API layer's hasFile() check picks it up and sends it as multipart/
+ * form-data — multer + Cloudinary handle it from there. A URL box is
+ * offered as an alternative for images already hosted elsewhere.
  */
 function FileField({
   field,
@@ -30,9 +22,9 @@ function FileField({
 }) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setError(null);
@@ -44,18 +36,14 @@ function FileField({
       setError("Image is larger than 3 MB — please pick a smaller one.");
       return;
     }
-    try {
-      setBusy(true);
-      onChange(await readFileAsDataUrl(file));
-    } catch {
-      setError("Could not read that file. Try another image.");
-    } finally {
-      setBusy(false);
-      if (inputRef.current) inputRef.current.value = "";
-    }
+    setPreviewUrl(URL.createObjectURL(file));
+    onChange(file);
+    if (inputRef.current) inputRef.current.value = "";
   }
 
-  const hasImage = typeof value === "string" && value.trim() !== "";
+  const isFile = value instanceof File;
+  const isExistingUrl = typeof value === "string" && value.trim() !== "";
+  const displaySrc = isFile ? previewUrl : isExistingUrl ? value : null;
 
   return (
     <div className="field">
@@ -65,8 +53,8 @@ function FileField({
       </label>
 
       <div className="upload-row">
-        <div className={`upload-preview${hasImage ? "" : " is-empty"}`}>
-          {hasImage ? <img src={value} alt="Preview" /> : <span>No image</span>}
+        <div className={`upload-preview${displaySrc ? "" : " is-empty"}`}>
+          {displaySrc ? <img src={displaySrc} alt="Preview" /> : <span>No image</span>}
         </div>
 
         <div className="upload-controls">
@@ -81,28 +69,32 @@ function FileField({
             <button
               type="button"
               className="btn btn-outline btn-sm"
-              disabled={busy}
               onClick={() => inputRef.current?.click()}
             >
-              {busy ? "Reading…" : hasImage ? "Replace image" : "Upload image"}
+              {displaySrc ? "Replace image" : "Upload image"}
             </button>
-            {hasImage && (
+            {displaySrc && (
               <button
                 type="button"
                 className="btn btn-danger btn-sm"
-                onClick={() => onChange("")}
+                onClick={() => {
+                  setPreviewUrl(null);
+                  onChange("");
+                }}
               >
                 Remove
               </button>
             )}
           </div>
-          <input
-            type="text"
-            className="upload-url"
-            placeholder="…or paste an image URL"
-            value={hasImage && value.startsWith("data:") ? "" : value ?? ""}
-            onChange={(e) => onChange(e.target.value)}
-          />
+          {!isFile && (
+            <input
+              type="text"
+              className="upload-url"
+              placeholder="…or paste an image URL"
+              value={isExistingUrl ? value : ""}
+              onChange={(e) => onChange(e.target.value)}
+            />
+          )}
         </div>
       </div>
 

@@ -102,24 +102,24 @@ export const ENTITIES: Record<string, EntityConfig> = {
   },
 
   team_members: {
-    key: "team_members",
-    label: "Team Members",
-    description: "Manage the core team and instructors shown on the About page.",
-    icon: "👥",
-    columns: [
-      { key: "image_url", label: "Image", render: "image" },
-      { key: "name", label: "Name", primary: true, sub: "designation" },
-      { key: "designation", label: "Designation" },
-      { key: "display_order", label: "Order" }
-    ],
-    fields: [
-      { name: "name", label: "Name", type: "text", required: true },
-      { name: "designation", label: "Designation", type: "text", required: true },
-      { name: "image_url", label: "Profile Image", type: "file", hint: "Upload a JPG or PNG profile picture" },
-      { name: "bio", label: "Bio", type: "textarea" },
-      { name: "display_order", label: "Display Order", type: "number", default: 0 }
-    ]
-  },
+  key: "team_members",
+  label: "Team Members",
+  description: "Manage the core team and instructors shown on the About page.",
+  icon: "👥",
+  columns: [
+    { key: "photo", label: "Image", render: "image" },
+    { key: "name", label: "Name", primary: true, sub: "designation" },
+    { key: "designation", label: "Designation" },
+    { key: "displayOrder", label: "Order" }
+  ],
+  fields: [
+    { name: "name", label: "Name", type: "text", required: true },
+    { name: "designation", label: "Designation", type: "text", required: true },
+    { name: "photo", label: "Profile Image", type: "file", hint: "Upload a JPG or PNG profile picture" },
+    { name: "bio", label: "Bio", type: "textarea" },
+    { name: "displayOrder", label: "Display Order", type: "number", default: 0 }
+  ]
+},
 
   branches: {
     key: "branches",

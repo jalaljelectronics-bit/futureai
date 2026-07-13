@@ -37,7 +37,7 @@ export async function getAllTeamMembersAdmin() {
   return data;
 }
 
-export async function createTeamMember(payload) {
+export async function createTeamMember(payload: Record<string, any>) {
   if (hasFile(payload)) {
     const { data } = await adminApi.post('/', toFormData(payload), {
       headers: { 'Content-Type': 'multipart/form-data' },
@@ -48,7 +48,7 @@ export async function createTeamMember(payload) {
   return data;
 }
 
-export async function updateTeamMember(id, payload) {
+export async function updateTeamMember(id: number, payload: Record<string, any>) {
   if (hasFile(payload)) {
     const { data } = await adminApi.put(`/${id}`, toFormData(payload), {
       headers: { 'Content-Type': 'multipart/form-data' },
@@ -59,7 +59,7 @@ export async function updateTeamMember(id, payload) {
   return data;
 }
 
-export async function deleteTeamMember(id) {
+export async function deleteTeamMember(id: number) {
   await adminApi.delete(`/${id}`);
   return true;
 }
