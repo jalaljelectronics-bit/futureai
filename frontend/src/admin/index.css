@@ -226,3 +226,62 @@
   .admin-scope .topbar { padding: 16px; }
 }
 .admin-scope .menu-toggle { display: none; background: none; border: 1px solid var(--color-card-border); border-radius: 8px; padding: 8px 11px; margin-right: 12px; }
+/* ============================================================
+   ADMIN — MOBILE POLISH
+   (Append to the end of admin.css. All rules scoped under
+   .admin-scope as usual.)
+   ============================================================ */
+
+/* ---------------- Overview stat cards: full stack on phones ---------------- */
+@media (max-width: 560px) {
+  .admin-scope .ov-grid { grid-template-columns: 1fr; gap: 12px; }
+  .admin-scope .ov-card { padding: 16px; }
+  .admin-scope .ov-card .num { font-size: 24px; }
+}
+
+/* ---------------- Data tables: allow horizontal scroll instead of squashing ---------------- */
+.admin-scope .panel { overflow-x: auto; } /* tables inside can now scroll sideways on narrow screens */
+@media (max-width: 700px) {
+  .admin-scope table { min-width: 640px; } /* keeps columns readable; panel scrolls to reveal them */
+  .admin-scope thead th,
+  .admin-scope tbody td { padding: 11px 14px; font-size: 13px; }
+}
+
+/* ---------------- Topbar: stack heading and actions on small screens ---------------- */
+@media (max-width: 560px) {
+  .admin-scope .topbar { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px 16px; }
+  .admin-scope .topbar h1 { font-size: 18px; }
+}
+
+/* ---------------- Panel head: stack title and button on small screens ---------------- */
+@media (max-width: 480px) {
+  .admin-scope .panel-head { flex-direction: column; align-items: flex-start; }
+  .admin-scope .panel-head .btn { width: 100%; justify-content: center; }
+}
+
+/* ---------------- Modal form: fit small screens without fixed padding ---------------- */
+@media (max-width: 620px) {
+  .admin-scope .overlay { padding: 20px 12px; align-items: center; }
+  .admin-scope .modal { padding: 22px 20px; max-width: 100%; }
+  .admin-scope .modal-actions { flex-direction: column-reverse; }
+  .admin-scope .modal-actions .btn { width: 100%; justify-content: center; }
+}
+
+/* ---------------- Image upload row: stack preview above controls ---------------- */
+@media (max-width: 480px) {
+  .admin-scope .upload-row { flex-direction: column; }
+  .admin-scope .upload-preview { width: 100%; height: 140px; }
+  .admin-scope .upload-buttons { flex-direction: column; }
+  .admin-scope .upload-buttons .btn { width: 100%; justify-content: center; }
+}
+
+/* ---------------- Login card: tighter padding on very small phones ---------------- */
+@media (max-width: 400px) {
+  .admin-scope .login-card { padding: 30px 22px; }
+  .admin-scope .login-card h1 { font-size: 19px; }
+}
+
+/* ---------------- Row actions: allow wrap instead of overflowing ---------------- */
+@media (max-width: 480px) {
+  .admin-scope .row-actions { flex-wrap: wrap; }
+}

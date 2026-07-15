@@ -953,3 +953,134 @@ p{margin:0 0 1em;color:var(--secondary);}
 @media (prefers-reduced-motion: reduce){
   .banner-track{transition:none;}
 }
+/* ============================================================
+   HOME PAGE — MOBILE POLISH
+   (Append to the end of your stylesheet; only adds/overrides,
+   nothing above is touched.)
+   ============================================================ */
+
+/* ---------------- Hero stats: 4-in-a-row is cramped on phones ---------------- */
+@media (max-width:720px){
+  .hero-stats{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px 16px;
+  }
+  .hero-stat{min-width:0;} /* let text wrap instead of overflowing */
+}
+@media (max-width:420px){
+  .hero-stats{grid-template-columns:1fr;} /* stack fully on very small phones */
+}
+
+/* ---------------- Hero "this week at the academy" panel ---------------- */
+@media (max-width:480px){
+  .hero-panel h4{font-size:1.4rem;}
+  .hero-panel-item{font-size:.84rem;padding:9px 10px;}
+}
+
+/* ---------------- Why Choose Us cards ---------------- */
+@media (max-width:480px){
+  .why-card{padding:22px 18px;}
+  .why-icon{width:46px;height:46px;font-size:1.25rem;border-radius:12px;}
+  .why-card h3{font-size:1.02rem;}
+}
+
+/* ---------------- Featured courses heading + button ---------------- */
+@media (max-width:480px){
+  .course-carousel + div .btn{width:100%;justify-content:center;} /* "See all courses" button */
+}
+
+/* ---------------- About Us summary band ---------------- */
+@media (max-width:480px){
+  .home-about-facts{grid-template-columns:1fr 1fr;gap:12px;}
+  .about-fact{padding:16px 12px;}
+  .about-fact b{font-size:1.6rem;}
+  .about-fact span{font-size:.82rem;}
+}
+@media (max-width:360px){
+  .home-about-facts{grid-template-columns:1fr;} /* stack facts on tiny phones */
+}
+
+/* ---------------- Stats strip (Why It Matters) ---------------- */
+@media (max-width:480px){
+  .stat-box b{font-size:1.6rem;}
+  .stat-box span{font-size:.78rem;}
+}
+
+/* ---------------- Branch callout (Vision Giants) ---------------- */
+@media (max-width:640px){
+  .branch-callout .btn{width:100%;justify-content:center;text-align:center;}
+}
+
+/* ---------------- General laptop/tablet tightening (in between 960 and 1200) ---------------- */
+@media (max-width:1180px) and (min-width:961px){
+  .hero-grid{gap:36px;}
+  .home-about-inner{gap:32px;padding:36px;}
+}
+/* ============================================================
+   COURSES / BLOGS / FAQ / CONTACT / ABOUT — MOBILE POLISH
+   (Append to the end of your stylesheet.)
+   ============================================================ */
+
+/* ---------------- Course cards: View Details / Enroll buttons ---------------- */
+@media (max-width:480px){
+  .course-foot{flex-direction:column;} /* stack the two buttons instead of squeezing side by side */
+  .course-card{padding:20px;}
+  .course-thumb{margin:-20px -20px 4px;}
+}
+
+/* ---------------- Curriculum teaser rows (course cards) ---------------- */
+@media (max-width:480px){
+  .curriculum-teaser-item{
+    flex-wrap:wrap;
+    gap:4px 0;
+    font-size:.86rem;
+  }
+  .curriculum-teaser-item .dur{margin-left:auto;}
+}
+
+/* ---------------- FAQ accordion ---------------- */
+@media (max-width:480px){
+  .faq-q{padding:16px 0;gap:14px;}
+  .faq-q h4{font-size:.94rem;line-height:1.4;}
+  .faq-plus{font-size:1.15rem;}
+}
+
+/* ---------------- Blog cards ---------------- */
+@media (max-width:480px){
+  .blog-body{padding:18px;gap:8px;}
+  .blog-body h3{font-size:1rem;}
+  .category-chips{gap:8px;margin-bottom:24px;}
+  .chip{padding:7px 13px;font-size:.78rem;}
+}
+
+/* ---------------- Blog detail ---------------- */
+@media (max-width:480px){
+  .section p[style]{font-size:.95rem !important;} /* body paragraphs in BlogDetail */
+}
+
+/* ---------------- Contact page ---------------- */
+@media (max-width:480px){
+  .contact-info-item{gap:12px;padding:14px 0;}
+  .contact-info-item .ic{width:34px;height:34px;font-size:.82rem;}
+  .contact-info-item h4{font-size:.9rem;}
+  .contact-info-item p{font-size:.84rem;}
+  .map-frame{height:180px;}
+  .form-row{gap:14px;}
+}
+
+/* ---------------- About page: director + team + testimonials ---------------- */
+@media (max-width:640px){
+  .director-name{font-size:1.4rem;} /* was fixed 30px, too large on phones */
+}
+@media (max-width:480px){
+  .director-quote{font-size:1.08rem;}
+  .person-card{padding:18px;}
+  .testimonial-card{padding:20px;}
+  .testimonial-quote{font-size:.96rem;}
+}
+
+/* ---------------- Shared page-hero tweaks (Courses/Blogs/FAQ/Contact/About all use .hero) ---------------- */
+@media (max-width:480px){
+  .hero h1{max-width:100% !important;} /* ch-based max-width can clip short headlines oddly on narrow screens */
+}

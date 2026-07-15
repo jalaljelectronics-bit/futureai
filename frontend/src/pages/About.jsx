@@ -32,7 +32,7 @@ export default function About() {
       <section className="section" style={{ paddingTop: 20 }}>
         <div className="container">
           <div className="director">
-            <img src="https://placehold.co/500x625/1C1917/F59E0B?text=Director" alt="Portrait of the Director" className="director-photo" />
+            <img src="https://res.cloudinary.com/r2fk1fws/image/upload/v1784015326/WhatsApp_Image_2026-07-14_at_12.32.40_PM_dxowt9.jpg" alt="Portrait of the Director" className="director-photo" />
             <div>
               <div className="eyebrow">Director's Message</div>
               <p className="director-quote">
@@ -40,7 +40,7 @@ export default function About() {
                 could compete for the same clients as anyone in Karachi, Dubai, or New York — and win, because
                 their skill is real.
               </p>
-              <div className="director-name">Muhammad Usman</div>
+              <div className="director-name">Hassan Ishtiaq Bukhari</div>
               <div className="director-role">Founder &amp; Director, Future AI Skills</div>
             </div>
           </div>
@@ -53,7 +53,7 @@ export default function About() {
             <div className="eyebrow">Our Team</div>
             <h2>Instructors who work in the industry they teach</h2>
           </div>
-          <div className="grid grid-4">
+          <div className="grid grid-2">
             {team.map((person) => (
               <div className="card person-card" key={person.id}>
                 <img

@@ -25,9 +25,14 @@ export default function Header() {
   return (
     <header className={`site-header${scrolled ? ' scrolled' : ''}`}>
       <nav className="nav">
-        <Link to="/" className="brand" onClick={close}>
-          <span className="brand-mark">FA</span> Future AI Skills
-        </Link>
+      
+<Link to="/" className="brand" onClick={close}>
+  <img
+    src="https://res.cloudinary.com/r2fk1fws/image/upload/v1784105100/logo_qz81cj.png"
+    alt="Future AI Skills logo"
+    className="brand-logo"
+  />
+</Link>
 
         <ul className={`nav-links${open ? ' open' : ''}`}>
           {navLinks.map(link => (
