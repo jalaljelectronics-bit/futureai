@@ -86,8 +86,8 @@ export default function Footer() {
           <div className="footer-col">
             <h5>Our Network</h5>
             <ul>
-              <li><a href="https://vgiants.com" target="_blank" rel="noopener noreferrer">Vision Giants ↗</a></li>
-              <li>Sister campus — web &amp; app dev</li>
+              <li><a href="https://vgiants.com/" target="_blank" rel="noopener noreferrer">Vision Giants ↗</a></li>
+              <li>Second campus </li>
             </ul>
           </div>
         </div>

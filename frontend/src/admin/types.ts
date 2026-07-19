@@ -3,19 +3,19 @@ export interface AdminUser {
   username: string;
   email?: string;
   role: string;
-  last_login_at?: string | null;
+  lastLoginAt?: string | null;
 }
 
 export interface Announcement {
   id: number;
   message: string;
-  cta_text?: string;
-  cta_link?: string;
-  is_active: boolean;
-  start_date?: string;
-  end_date?: string;
-  created_at?: string;
-  updated_at?: string;
+  ctaText?: string;
+  ctaLink?: string;
+  isActive: boolean;
+  startDate?: string;
+  endDate?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CourseCurriculumItem {
@@ -55,7 +55,7 @@ export interface SuccessStory {
   studentName: string;
   studentPhoto?: string | null;
   courseId?: number | null;
-  course?: { title: string; slug: string } | null; // populated via Prisma include on GET
+  course?: { title: string; slug: string } | null;
   testimonial: string;
   achievementHighlight?: string | null;
   videoUrl?: string | null;
@@ -79,21 +79,6 @@ export interface TeamMember {
   updatedAt?: string;
 }
 
-export interface Branch {
-  id: number;
-  name: string;
-  description?: string;
-  website_url?: string;
-  logo?: string | null;
-  display_order?: number;
-}
-
-export interface BlogCategory {
-  id: number;
-  name: string;
-  slug: string;
-}
-
 export interface BlogPost {
   id: number;
   title: string;
@@ -115,8 +100,8 @@ export interface ContactSubmission {
   email?: string;
   phone?: string;
   message?: string;
-  is_read: boolean;
-  submitted_at?: string;
+  isRead: boolean;
+  submittedAt?: string;
 }
 
 /** All CRUD-manageable tables (admin_users is intentionally excluded — it's
@@ -127,14 +112,10 @@ export interface DB {
   courses: Course[];
   success_stories: SuccessStory[];
   team_members: TeamMember[];
-  branches: Branch[];
-  blog_categories: BlogCategory[];
   blog_posts: BlogPost[];
   contact_submissions: ContactSubmission[];
 }
 
 export type ManagedTable = Exclude<keyof DB, "admin_users">;
 
-/** A loosely-typed row shape used by the generic table/form components,
- *  which operate across every entity type from one config object. */
 export type AnyRecord = Record<string, any> & { id: number };

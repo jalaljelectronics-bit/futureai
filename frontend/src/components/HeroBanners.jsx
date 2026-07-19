@@ -3,49 +3,33 @@ import { useEffect, useRef, useState } from 'react';
 /* ------------------------------------------------------------------
    HOME PAGE BANNER SLIDER (top of the hero area)
 
-   Shows the banner artwork from src/assets, one after another —
-   each banner is on screen for 3 seconds, then it slides to the next.
+   Shows banners from Cloudinary, one after another — each banner is
+   on screen for 3 seconds, then it slides to the next.
 
-   HOW TO ADD BANNERS
-   ------------------
-   Just drop the image into  src/assets/  with a name that starts
-   with "banner" — e.g.  banner-master-ai.jpg,  banner-2.jpg ...
-   They are picked up automatically, in filename order. No code change.
+   HOW TO ADD / CHANGE BANNERS
+   ----------------------------
+   Just edit the BANNERS array below. Each entry needs:
+     - src        : the Cloudinary image URL (required)
+     - mobileSrc  : a Cloudinary URL for a taller/cropped mobile
+                    version (optional — leave null to reuse `src`)
+     - alt        : alt text for accessibility
 
-   OPTIONAL MOBILE ARTWORK
-   -----------------------
-   Wide banners (1600x500) get very short on a phone. If you have a
-   taller/cropped version for mobile, name it with a "-mobile" suffix:
-       banner-2.jpg          -> used on tablet + desktop
-       banner-2-mobile.jpg   -> used on phones (<=640px)
-   If no -mobile file exists, the desktop one is used everywhere.
+   Order in the array = order in the slider. Add or remove entries
+   as needed, no other code changes required.
    ------------------------------------------------------------------ */
 
-const FILES = import.meta.glob('../assets/banner*.{jpg,jpeg,png,webp,avif}', {
-  eager: true,
-  query: '?url',
-  import: 'default',
-});
-
-const BANNERS = (() => {
-  const desktop = new Map();
-  const mobile = new Map();
-
-  Object.entries(FILES).forEach(([path, url]) => {
-    const name = path.split('/').pop().replace(/\.[^.]+$/, ''); // "banner-2" | "banner-2-mobile"
-    if (name.endsWith('-mobile')) mobile.set(name.replace(/-mobile$/, ''), url);
-    else desktop.set(name, url);
-  });
-
-  return [...desktop.keys()]
-    .sort((a, b) => a.localeCompare(b, undefined, { numeric: true }))
-    .map((key, i) => ({
-      key,
-      src: desktop.get(key),
-      mobileSrc: mobile.get(key) || null,
-      alt: `Future AI Skills banner ${i + 1}`,
-    }));
-})();
+const BANNERS = [
+  {
+    src: 'https://res.cloudinary.com/r2fk1fws/image/upload/v1784458100/WhatsApp_Image_2026-07-19_at_3.24.35_PM_1_fc5j3r.jpg',
+    mobileSrc: null,
+    alt: 'Future AI Skills banner 1',
+  },
+  {
+    src: 'https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/v1234567890/future-ai-skills/banners/banner-2.jpg',
+    mobileSrc: null,
+    alt: 'Future AI Skills banner 2',
+  },
+];
 
 const INTERVAL = 3000; // 3 seconds per banner
 const SWIPE = 50;      // px before a swipe counts
@@ -69,7 +53,7 @@ export default function HeroBanners() {
     return () => clearInterval(timer.current);
   }, [paused, total]);
 
-  if (!total) return null; // nothing in assets yet — render nothing
+  if (!total) return null; // nothing in the array yet — render nothing
 
   const go = (i) => setIndex((i + total) % total);
 
@@ -103,7 +87,7 @@ export default function HeroBanners() {
           {BANNERS.map((b, i) => (
             <div
               className="banner-slide"
-              key={b.key}
+              key={b.src}
               style={{ width: `${100 / total}%` }}
               aria-hidden={i !== index}
               role="group"
@@ -134,7 +118,7 @@ export default function HeroBanners() {
           <div className="banner-dots" role="tablist" aria-label="Choose banner">
             {BANNERS.map((b, i) => (
               <button
-                key={b.key}
+                key={b.src}
                 className={`banner-dot${i === index ? ' is-active' : ''}`}
                 aria-label={`Go to banner ${i + 1}`}
                 aria-selected={i === index}

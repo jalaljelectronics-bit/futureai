@@ -121,23 +121,7 @@ export const ENTITIES: Record<string, EntityConfig> = {
   ]
 },
 
-  branches: {
-    key: "branches",
-    label: "Branches",
-    icon: "🏢",
-    description: "Sister institutes / branches, shown on the About page (e.g. Vision Giants).",
-    columns: [
-      { key: "name", label: "Name", primary: true, sub: "website_url" },
-      { key: "description", label: "Description" }
-    ],
-    fields: [
-      { name: "name", label: "Name", type: "text", required: true },
-      { name: "description", label: "Description", type: "textarea" },
-      { name: "website_url", label: "Website URL", type: "text" },
-      { name: "display_order", label: "Display order", type: "number" }
-    ]
-  },
-
+ 
   blog_posts: {
     key: "blog_posts",
     label: "Blog Posts",
@@ -186,7 +170,6 @@ export const ENTITY_ORDER: ManagedTable[] = [
   "courses",
   "success_stories",
   "team_members",
-  "branches",
   "blog_posts",
   "contact_submissions",
 ];

@@ -75,9 +75,9 @@ export default function About() {
           <div className="branch-callout">
             <div>
               <h3>Our second branch — Vision Giants</h3>
-              <p>As students asked to go deeper into tech, we opened Vision Giants: a sister campus focused on web development, app development and software careers.</p>
+              <p>As students asked to go deeper into tech, we opened Vision Giants: second campus focused on web development, app development and software careers.</p>
             </div>
-            <a href="https://visiongiants.example.com" target="_blank" rel="noopener noreferrer" className="btn btn-accent">Visit visiongiants.example.com ↗</a>
+            <a href="https://vgiants.com/" target="_blank" rel="noopener noreferrer" className="btn btn-accent">Visit https://vgiants.com/ ↗</a>
           </div>
         </div>
       </section>

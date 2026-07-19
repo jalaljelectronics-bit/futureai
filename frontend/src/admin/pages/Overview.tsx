@@ -9,10 +9,10 @@ interface Props {
 
 export default function Overview({ onNavigate }: Props) {
   const { db } = useData();
-  const unread = db.contact_submissions.filter((c) => !c.is_read).length;
+  const unread = db.contact_submissions.filter((c) => !c.isRead).length;
 
   const cards = [
-    { num: db.courses.filter((c) => c.is_active).length, lbl: "Active courses" },
+    { num: db.courses.filter((c) => c.isActive).length, lbl: "Active courses" },
     { num: db.blog_posts.filter((b) => b.status === "published").length, lbl: "Published posts" },
     { num: db.success_stories.length, lbl: "Success stories" },
     { num: unread, lbl: "Unread messages" }

@@ -172,9 +172,9 @@ export default function Home() {
           <div className="branch-callout">
             <div>
               <h3>Expanding into software with Vision Giants</h3>
-              <p>Our sister campus focuses on web &amp; app development — for students who want to go further into tech.</p>
+              <p>Our second campus focuses on web &amp; app development — for students who want to go further into tech.</p>
             </div>
-            <a href="https://vgiants.com" target="_blank" rel="noopener noreferrer" className="btn btn-accent">Visit Vision Giants ↗</a>
+            <a href="https://vgiants.com/" target="_blank" rel="noopener noreferrer" className="btn btn-accent">Visit Vision Giants ↗</a>
           </div>
         </div>
       </section>

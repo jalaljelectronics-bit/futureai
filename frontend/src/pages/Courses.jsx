@@ -39,7 +39,6 @@ export default function Courses() {
                   </div>
                   <h3><Link to={`/courses/${c.slug}`} style={{ color: 'inherit' }}>{c.title}</Link></h3>
                   <p>{c.summary}</p>
-                  <div className="course-rating">⭐ <b>{c.rating}</b> ({c.reviews} reviews)</div>
 
                   {preview.length > 0 && (
                     <div className="curriculum-teaser">

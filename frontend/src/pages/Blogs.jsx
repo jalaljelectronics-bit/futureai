@@ -47,7 +47,11 @@ export default function Blogs() {
           <div className="grid grid-3">
             {visible.map((post) => (
               <div className="card blog-card" key={post.slug}>
-                <img className="blog-thumb" src={`https://placehold.co/500x310/14213D/F59E0B?text=${post.img}`} alt={`${post.title} thumbnail`} />
+                <img
+                  className="blog-thumb"
+                  src={post.featuredImage || `https://placehold.co/500x310/14213D/F59E0B?text=${post.img}`}
+                  alt={`${post.title} thumbnail`}
+                />
                 <div className="blog-body">
                   <div className="blog-meta">{post.meta}</div>
                   <h3>{post.title}</h3>

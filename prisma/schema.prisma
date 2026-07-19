@@ -146,7 +146,8 @@ model BlogPost {
   excerpt       String?    @db.VarChar(500)
   content       String
   featuredImage String?    @map("featured_image") @db.VarChar(255)
-  category      String?    @db.VarChar(100)
+  categoryId    Int?       @map("category_id")
+  category      BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   authorId      Int?       @map("author_id")
   author        AdminUser? @relation(fields: [authorId], references: [id])
   status        String     @default("draft") @db.VarChar(20)
@@ -156,10 +157,9 @@ model BlogPost {
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([status, publishedAt(sort: Desc)])
-  @@index([category])
+  @@index([categoryId])
   @@map("blog_posts")
 }
-
 // ------------------------------------------------------------
 // 7. CONTACT FORM SUBMISSIONS
 // ------------------------------------------------------------

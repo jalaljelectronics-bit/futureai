@@ -19,13 +19,15 @@ const adminTeamMembersRouter = require("./routes/adminTeamMembers");
 const app = express();
 
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "http://localhost:5174",
-  ],
+  origin: (origin, callback) => {
+    if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
 }));
-
 app.use(helmet());
 app.use(morgan("dev"));
 

@@ -99,7 +99,7 @@ export default function CourseCarousel({ courses }) {
                 </div>
                 <h3>{c.title}</h3>
                 <p>{c.summary}</p>
-                <div className="course-rating">⭐ <b>{c.rating}</b> ({c.reviews} reviews)</div>
+        
                 <div className="course-foot">
                   <Link to={`/courses/${c.slug}`} className="link-arrow">View full details →</Link>
                 </div>

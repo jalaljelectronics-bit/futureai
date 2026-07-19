@@ -39,9 +39,6 @@ export default function CourseDetail() {
           </div>
           <h1 style={{ maxWidth: '22ch' }}>{data.title}</h1>
           <p className="hero-lead">{data.summary}</p>
-          <div className="course-rating" style={{ color: '#C7C2BB', marginBottom: 22 }}>
-            ⭐ <b>{data.rating}</b> ({data.reviews} reviews)
-          </div>
           <div className="hero-actions">
             <Link to="/contact" className="btn btn-accent">Enroll in this course</Link>
             <Link to="/faq" className="btn btn-outline">Read the FAQs</Link>
@@ -130,8 +127,6 @@ export default function CourseDetail() {
         </section>
       )}
 
-      
-
       <section className="section-tight">
         <div className="container">
           <div className="branch-callout">
@@ -160,7 +155,6 @@ export default function CourseDetail() {
                   </div>
                   <h3>{c.title}</h3>
                   <p>{c.summary}</p>
-                  <div className="course-rating">⭐ <b>{c.rating}</b> ({c.reviews} reviews)</div>
                   <div className="course-foot"><span className="link-arrow">View full details →</span></div>
                 </Link>
               ))}

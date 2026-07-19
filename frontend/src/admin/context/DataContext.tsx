@@ -36,8 +36,12 @@ import {
   deleteAnnouncement,
 } from "../../api/announcementApi";
 
+type LoadKey = "courses" | "blog_posts" | "success_stories" | "team_members" | "announcements";
+
 interface DataContextValue {
   db: DB;
+  isLoading: boolean;
+  loadErrors: Partial<Record<LoadKey, boolean>>;
   addRecord: (table: ManagedTable, record: Record<string, any>) => Promise<AnyRecord>;
   updateRecord: (table: ManagedTable, id: number, updates: Record<string, any>) => Promise<AnyRecord | null>;
   deleteRecord: (table: ManagedTable, id: number) => Promise<void>;
@@ -47,6 +51,7 @@ interface DataContextValue {
   refreshTeamMembersAdmin: () => Promise<void>;
   refreshContactSubmissionsAdmin: () => Promise<void>;
   refreshAnnouncementsAdmin: () => Promise<void>;
+  retryPublicLoad: () => void;
 }
 
 const DataContext = createContext<DataContextValue | undefined>(undefined);
@@ -55,34 +60,63 @@ function nextId(rows: { id: number }[]): number {
   return rows.reduce((max, r) => Math.max(max, r.id || 0), 0) + 1;
 }
 
+// Public-facing tables start EMPTY, never with seed/demo content, so a failed
+// fetch can never be mistaken for real data.
+const EMPTY_DB: DB = {
+  ...seedDB,
+  courses: [],
+  blog_posts: [],
+  success_stories: [],
+  team_members: [],
+  announcements: [],
+  contact_submissions: [],
+};
+
 export function DataProvider({ children }: { children: React.ReactNode }) {
-  const [db, setDb] = useState<DB>(seedDB);
+  const [db, setDb] = useState<DB>(EMPTY_DB);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadErrors, setLoadErrors] = useState<Partial<Record<LoadKey, boolean>>>({});
+  const [reloadTick, setReloadTick] = useState(0);
 
   useEffect(() => {
-    getCourses()
-      .then((courses) => setDb((prev) => ({ ...prev, courses: courses as any })))
-      .catch((err) => console.error("Failed to load courses from backend:", err));
+    let cancelled = false;
+    setIsLoading(true);
 
-    getPublishedBlogPosts()
-      .then((posts) => setDb((prev) => ({ ...prev, blog_posts: posts as any })))
-      .catch((err) => console.error("Failed to load blog posts from backend:", err));
+    const jobs: [LoadKey, Promise<any>][] = [
+      ["courses", getCourses()],
+      ["blog_posts", getPublishedBlogPosts()],
+      ["success_stories", getPublicSuccessStories()],
+      ["team_members", getPublicTeamMembers()],
+      ["announcements", getPublicAnnouncements()],
+    ];
 
-    getPublicSuccessStories()
-      .then((stories) => setDb((prev) => ({ ...prev, success_stories: stories as any })))
-      .catch((err) => console.error("Failed to load success stories from backend:", err));
+    Promise.allSettled(jobs.map(([, p]) => p)).then((results) => {
+      if (cancelled) return;
 
-    getPublicTeamMembers()
-      .then((members) => setDb((prev) => ({ ...prev, team_members: members as any })))
-      .catch((err) => console.error("Failed to load team members from backend:", err));
+      const errors: Partial<Record<LoadKey, boolean>> = {};
+      const patch: Partial<DB> = {};
 
-    getPublicAnnouncements()
-      .then((announcements) => setDb((prev) => ({ ...prev, announcements: announcements as any })))
-      .catch((err) => console.error("Failed to load announcements from backend:", err));
+      results.forEach((result, i) => {
+        const [key] = jobs[i];
+        if (result.status === "fulfilled") {
+          (patch as any)[key] = result.value;
+        } else {
+          console.error(`Failed to load ${key} from backend:`, result.reason);
+          errors[key] = true;
+        }
+      });
 
-    // NOTE: contact_submissions is never fetched here — there is no public
-    // view of contact submissions. It's only loaded on demand via
-    // refreshContactSubmissionsAdmin(), when an admin opens that section.
-  }, []);
+      setDb((prev) => ({ ...prev, ...patch }));
+      setLoadErrors(errors);
+      setIsLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadTick]);
+
+  const retryPublicLoad = useCallback(() => setReloadTick((t) => t + 1), []);
 
   const refreshBlogPostsAdmin = useCallback(async () => {
     try {
@@ -294,6 +328,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     <DataContext.Provider
       value={{
         db,
+        isLoading,
+        loadErrors,
         addRecord,
         updateRecord,
         deleteRecord,
@@ -303,6 +339,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         refreshTeamMembersAdmin,
         refreshContactSubmissionsAdmin,
         refreshAnnouncementsAdmin,
+        retryPublicLoad,
       }}
     >
       {children}
