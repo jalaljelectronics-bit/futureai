@@ -1,0 +1,176 @@
+// ============================================================
+// Future AI Skills — Prisma Schema (PostgreSQL)
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------------
+// 1. ADMIN USERS
+// ------------------------------------------------------------
+model AdminUser {
+  id           Int       @id @default(autoincrement())
+  username     String    @unique @db.VarChar(100)
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  role         String    @default("admin") @db.VarChar(50)
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  announcements  Announcement[]
+  courses        Course[]
+  successStories SuccessStory[]
+  teamMembers    TeamMember[]
+  blogPosts      BlogPost[]
+  
+
+  @@map("admin_users")
+}
+
+// ------------------------------------------------------------
+// 2. ANNOUNCEMENT BAR
+// ------------------------------------------------------------
+model Announcement {
+  id        Int       @id @default(autoincrement())
+  message   String    @db.VarChar(300)
+  ctaText   String?   @map("cta_text") @db.VarChar(50)
+  ctaLink   String?   @map("cta_link") @db.VarChar(255)
+  isActive  Boolean   @default(true) @map("is_active")
+  startDate DateTime? @map("start_date") @db.Date
+  endDate   DateTime? @map("end_date") @db.Date
+
+  createdBy Int?       @map("created_by")
+  admin     AdminUser? @relation(fields: [createdBy], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("announcements")
+}
+
+// ------------------------------------------------------------
+// 3. COURSES  (+ curriculum modules)
+// ------------------------------------------------------------
+model Course {
+  id             Int      @id @default(autoincrement())
+  title          String   @db.VarChar(150)
+  slug           String   @unique @db.VarChar(160)
+  category       String?  @db.VarChar(100)
+  duration       String?  @db.VarChar(50)
+  description    String?
+  courseOutline  String? @map("course_outline")
+  thumbnailImage String?  @map("thumbnail_image") @db.VarChar(255)
+  rating         Decimal? @db.Decimal(2, 1)
+  reviewCount    Int      @default(0) @map("review_count")
+  
+  isActive       Boolean  @default(true) @map("is_active")
+  displayOrder   Int      @default(0) @map("display_order")
+
+  createdBy Int?       @map("created_by")
+  admin     AdminUser? @relation(fields: [createdBy], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  
+  successStories SuccessStory[]
+
+  @@index([isActive])
+  @@index([category])
+  @@map("courses")
+}
+
+
+// ------------------------------------------------------------
+// 4. SUCCESS STORIES
+// ------------------------------------------------------------
+model SuccessStory {
+  id                   Int     @id @default(autoincrement())
+  studentName          String  @map("student_name") @db.VarChar(150)
+  studentPhoto         String? @map("student_photo") @db.VarChar(255)
+  courseId             Int?    @map("course_id")
+  course               Course? @relation(fields: [courseId], references: [id], onDelete: SetNull)
+  testimonial          String
+  achievementHighlight String? @map("achievement_highlight") @db.VarChar(255)
+  videoUrl             String? @map("video_url") @db.VarChar(255)
+  isActive             Boolean @default(true) @map("is_active")
+  displayOrder         Int     @default(0) @map("display_order")
+
+  createdBy Int?       @map("created_by")
+  admin     AdminUser? @relation(fields: [createdBy], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, displayOrder])
+  @@map("success_stories")
+}
+
+// ------------------------------------------------------------
+// 5. TEAM MEMBERS
+// ------------------------------------------------------------
+model TeamMember {
+  id           Int     @id @default(autoincrement())
+  name         String  @db.VarChar(150)
+  designation  String? @db.VarChar(150)
+  photo        String? @db.VarChar(255)
+  bio          String?
+  specialty    String? @db.VarChar(255)
+  socialLinks  Json?   @map("social_links")
+  isActive     Boolean @default(true) @map("is_active")
+  displayOrder Int     @default(0) @map("display_order")
+
+  createdBy Int?       @map("created_by")
+  admin     AdminUser? @relation(fields: [createdBy], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, displayOrder])
+  @@map("team_members")
+}
+
+
+
+model BlogPost {
+  id            Int        @id @default(autoincrement())
+  title         String     @db.VarChar(200)
+  slug          String     @unique @db.VarChar(220)
+  excerpt       String?    @db.VarChar(500)
+  content       String
+  featuredImage String?    @map("featured_image") @db.VarChar(255)
+  category      String?    @db.VarChar(100)
+  authorId      Int?       @map("author_id")
+  author        AdminUser? @relation(fields: [authorId], references: [id])
+  status        String     @default("draft") @db.VarChar(20)
+  publishedAt   DateTime?  @map("published_at")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([category])
+  @@map("blog_posts")
+}
+// ------------------------------------------------------------
+// 7. CONTACT FORM SUBMISSIONS
+// ------------------------------------------------------------
+model ContactSubmission {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(150)
+  email       String?  @db.VarChar(255)
+  phone       String?  @db.VarChar(50)
+  message     String?
+  isRead      Boolean  @default(false) @map("is_read")
+  submittedAt DateTime @default(now()) @map("submitted_at")
+
+  @@map("contact_submissions")
+}
+
