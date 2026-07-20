@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import logo from '../assets/logo.png';
+import logoo from '../assets/logo.png';
 
 /* Social links shown in the footer. Replace the `href` values with the
    academy's real profile URLs. The WhatsApp link uses the same number as
@@ -43,7 +43,7 @@ export default function Footer() {
       <div className="container">
         <div className="footer-grid">
           <div>
-            <div className="footer-brand"><img src={logo} alt="Future AI Skills" className="footer-logo" /> Future AI Skills</div>
+            <div className="footer-brand"><img src={logoo} alt="Future AI Skills" className="footer-logo" /> Future AI Skills</div>
             <p style={{ color: '#B8B3AC', fontSize: '.9rem', maxWidth: '32ch' }}>
               A physical training academy in Shujabad, Punjab — building careers in digital skills and the global freelance economy.
             </p>
