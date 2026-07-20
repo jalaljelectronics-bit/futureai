@@ -43,7 +43,12 @@ export default function Footer() {
       <div className="container">
         <div className="footer-grid">
           <div>
-            <div className="footer-brand"><img src={logoo} alt="Future AI Skills" className="footer-logo" /> Future AI Skills</div>
+            <div className="footer-brand"><Link to="/" className="brand" onClick={close}>
+                    <img src="https://res.cloudinary.com/r2fk1fws/image/upload/v1784374230/download_nhz1eb.png"
+                     alt="Future AI Skills logo"
+                      className="brand-logo"
+              />
+            </Link> Future AI Skills</div>
             <p style={{ color: '#B8B3AC', fontSize: '.9rem', maxWidth: '32ch' }}>
               A physical training academy in Shujabad, Punjab — building careers in digital skills and the global freelance economy.
             </p>
