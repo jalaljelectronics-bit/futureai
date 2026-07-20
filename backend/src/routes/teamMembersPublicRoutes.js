@@ -1,5 +1,5 @@
 const express = require('express');
-const { getPublicTeamMembers } = require('../controllers/TeammemberController');
+const { getPublicTeamMembers } = require('../controllers/teamMemberController');
 
 const router = express.Router();
 
