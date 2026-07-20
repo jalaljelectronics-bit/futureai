@@ -18,16 +18,24 @@ const adminTeamMembersRouter = require("./routes/adminTeamMembers");
 
 const app = express();
 
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-}));
+const allowedOrigins = [
+     process.env.FRONTEND_URL,
+   ].filter(Boolean);
+
+   app.use(cors({
+     origin: (origin, callback) => {
+       if (
+         !origin ||
+         /^http:\/\/localhost:\d+$/.test(origin) ||
+         allowedOrigins.includes(origin)
+       ) {
+         callback(null, true);
+       } else {
+         callback(new Error("Not allowed by CORS"));
+       }
+     },
+     credentials: true,
+   }));
 app.use(helmet());
 app.use(morgan("dev"));
 
