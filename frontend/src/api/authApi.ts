@@ -1,5 +1,5 @@
-const API_URL = "http://localhost:5000/api/admin";
-
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_URL = `${API_BASE}/api/admin`;
 export async function loginAdmin(username: string, password: string) {
   const response = await fetch(`${API_URL}/login`, {
     method: "POST",
@@ -29,7 +29,7 @@ export async function logoutAdmin() {
   });
 }
 export async function getCurrentAdmin() {
-  const res = await fetch("http://localhost:5000/api/admin/me", {
+  const res = await fetch(`${API_URL}/me`, {
     credentials: "include",
   });
 
